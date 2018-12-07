@@ -4,20 +4,20 @@ import google.oauth2.credentials
 
 
 class Google:
-    def __init__(self, access_token):
+            
+    def configure(self, access_token):
+            self.access_token = access_token
+            self.credentials = google.oauth2.credentials.Credentials(access_token)
+            self.mail_service = build('gmail', 'v1', credentials=self.credentials)
+            self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
 
-        self.access_token = access_token
-        self.credentials = google.oauth2.credentials.Credentials(access_token)
-        self.mail_service = build('gmail', 'v1', credentials=self.credentials)
-        self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
+            try:
+                response = self.authed_session.get("https://www.googleapis.com/gmail/v1/users/me/profile").json()
+                self.email = response["emailAddress"]
+                print(self.email)
 
-        try:
-            response = self.authed_session.get("https://www.googleapis.com/gmail/v1/users/me/profile").json()
-            self.email = response["emailAddress"]
-            print(self.email)
-
-        except:
-            print("Error: Invalid Access Token")
+            except:
+                print("Error: Invalid Access Token")
 
     def ListMessagesMatchingQuery(self, query=''):
         """List all Messages of the user's mailbox matching the query.
@@ -112,14 +112,18 @@ class Google:
             }
             EventArray.append(NewDictionaryItem)
         return EventArray
-
+    
+    def __init__(self, access_token):
+        if(access_token is not None):
+            configure(access_token)
+            
 # Sample usage
-#thisaccess_token = "ya29.GltpBlJwAHXAd6rLFiy7Fdc5-q3FA-JNGUvfw5oSM9BVuouMZWFn" \
- #                  "FU7Ul5PaPzH-7BYlDsvmAMKAdeQcCy6s1GGOfb-49x7O58C7cPbLMdxeRGkR879vWKvgalGB"
-#google = Google(thisaccess_token)
+thisaccess_token = "ya29.GltpBlJwAHXAd6rLFiy7Fdc5-q3FA-JNGUvfw5oSM9BVuouMZWFn" \
+                   "FU7Ul5PaPzH-7BYlDsvmAMKAdeQcCy6s1GGOfb-49x7O58C7cPbLMdxeRGkR879vWKvgalGB"
+google = Google(thisaccess_token)
 
-#print(google.MessageList())
-#print(google.EventList())
+print(google.MessageList())
+print(google.EventList())
 
 
 
