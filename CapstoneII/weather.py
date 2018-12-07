@@ -1,5 +1,6 @@
 import requests
 
+<<<<<<< HEAD
 class Weather:
 	api_url = 'https://api.openweathermap.org/data/2.5/weather'
 	api_key = "32b9477a3c48ef090c4b145b091324d9"
@@ -20,3 +21,10 @@ class Weather:
 	
 	def get_results(self):
 		return self.r.text
+=======
+
+class Weather:
+	api_key = "32b9477a3c48ef090c4b145b091324d9"
+	def __init__(self, weather_locs):
+		
+>>>>>>> 94739632b643f65f3f2555f985998ab09cf446e7

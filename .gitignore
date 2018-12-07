@@ -4,3 +4,4 @@ CapstoneII/api_keys/
 
 CapstoneII/GoogleAPI.py
 CapstoneII/conf/settings.json
+CapstoneII/__pycache__/
