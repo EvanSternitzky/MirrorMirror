@@ -2,27 +2,46 @@
 from guizero import *
 import datetime
 import calendar
-#import asyncio
+import threading
 #import socket
 #import os
 #import sys
-#from msg_parser import MessageParser
+from msg_parser import MessageParser
 from filelock import Timeout, FileLock
 #import tkinter
+import json
+from rss import RssFeed
 
 settings_file = "./conf/settings.json"
-def check_settings():
-		lock = FileLock(settings_file + ".lock", timeout=2)
-		s_data = None
-		try:
-			with lock:
-				settings_data_fhandle = open(settings_file)
-				settings_data = settings_data_fhandle.read()
-				print(settings_data)
-		except Timeout:
-			print("Failed to acquire file lock")
-		finally:
-			lock.release()
+
+
+#def check_settings():
+#	lock = FileLock(settings_file + ".lock", timeout=2)
+#	s_data = None
+#	try:
+#		with lock:
+#			settings_data_fhandle = open(settings_file)
+#			settings_data = settings_data_fhandle.read()
+#			json_data = json.loads(settings_data)
+#			rss_feeds = []
+#			feed_titles = ""
+#			rss_feeds = Text(app, text = "Test", grid=[0,0], color="white", size="35")
+#			for feed in json_data["RssFeeds"]:
+#				feed_info = RssFeed(feed["Name"], feed["FeedUrl"])
+#				for f_3 in feed_info.news_entries:
+#					feed_titles += f_3 + '\n'
+#			rss_feeds.set(feed_titles)	
+#
+#			print(settings_data)
+#	except Timeout:
+#		print("Failed to acquire file lock")
+#	finally:
+#		lock.release()
+
+
+#def spawn_thread():
+#	thread = Thread(target=check_settings)
+#	thread.start()
 
 
 #Global Variables
@@ -58,8 +77,8 @@ cal = calendar.TextCalendar(calendar.SUNDAY)
 
 def update():
 	now = datetime.datetime.now()
-	display_clock.set(now.strftime("%I:%M %p"))
-	display_date.set(now.strftime("%a %b-%d, %Y"))
+	display_clock.value = (now.strftime("%I:%M %p"))
+	display_date.value = (now.strftime("%a %b-%d, %Y"))
         
 #os.system('setterm -cursor off')
 try:
@@ -96,20 +115,70 @@ try:
 	year = int(now.strftime("%Y"))
 	month = int(now.strftime("%-m"))
 	calFormat = cal.formatmonth(year,month,0,0)
-	print(calFormat)
+	print(calFormat, flush=True)
 	Box2 = Box(app, grid=Calendar_Grid, visible = Calendar_Visible)
 	display_calendar = Text(Box2, text = calFormat, color="white", size="35", align="left")
-
-
+	Box3 = Box(app, layout="grid", grid=[0,1], visible=True)
+	Box4 = Box(app, layout="grid", grid=[0,2], visible=True)
+	Box5 = Box(app, layout="grid", grid=[1,1], visible=True)
+	q1 = "Test1"
+	q2 = "Test2"
+	q3 = "Test3"
+	q4 = "Test4"
+	q5 = "Test5"
+	Text1 = Text(Box1, text=q1, grid=[0, 2], color="white", size="8", align="left")
+	Text2 = Text(Box2, text=q2, grid=[1, 1], color="white", size="8", align="left")
+	Text3 = Text(Box3, text=q3, grid=[1, 1], color="white", size="8", align="left")
+	Text4 = Text(Box4, text=q4, grid=[1, 1], color="white", size="8", align="left")
+	Text5 = Text(Box5, text=q5, grid=[1, 1], color="white", size="8", align="left")
 	app.repeat(500,update)
-	app.repeat(1000, check_settings)
-
+	#app.repeat(1000, spawn_thread)
 	#sets full screen-Makes debug hard. To Get out: CTR+ALT+D
 	app.tk.attributes("-fullscreen", True)
+	def start_listening():
+
+		def update_quads(bindings, quads):
+			if quads[0]['ItemType'] != None:
+				q1 = bindings.get(quads[0]['ItemType'])
+				Text1.value = q1
+				print(bindings.get(quads[0]['ItemType']))
+			if quads[1]['ItemType'] != None:
+				q2 = bindings.get(quads[1]['ItemType'])
+				Text2.value = q2
+				print(bindings.get(quads[1]['ItemType']))
+			if quads[2]['ItemType'] != None:
+				q3 = bindings.get(quads[2]['ItemType'])
+				Text3.value = q3
+				print(bindings.get(quads[2]['ItemType']))
+			if quads[3]['ItemType'] != None:
+				q4 = bindings.get(quads[3]['ItemType'])
+				Text4.value = q4
+				print(bindings.get(quads[3]['ItemType']))
+			if quads[4]['ItemType'] != None:
+				q5 = bindings.get(quads[4]['ItemType'])
+				Text5.value = q5
+				print(bindings.get(quads[4]['ItemType']))
+
+		def msg_callback(body):
+			lock = threading.Lock()
+			lock.acquire()
+			json_data = json.loads(body)
+			quads = json_data["Cfg"]
+			rss_feeds = json_data["RssFeeds"]
+			weather_locs = json_data["WeatherLocations"]
+			google_info = json_data["GoogleInfo"]
+			feed_text = RssFeed(rss_feeds).get_entries()
+			bindings = {"RSS Feeds": feed_text}
+			update_quads(bindings, quads)
+			lock.release()
+		msg = MessageParser(msg_callback)
+		msg.start_listening()
+
+	thread = threading.Thread(target=start_listening)
+	thread.start()
 
 	#nocursor is not working to turn cursor to be invisible.
 	#will need to find something else to make it invisible or move position to side/corner
-
 	app.display()
 
 except KeyboardInterrupt:
