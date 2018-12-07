@@ -114,12 +114,12 @@ class Google:
         return EventArray
 
 # Sample usage
-thisaccess_token = "ya29.GltpBlJwAHXAd6rLFiy7Fdc5-q3FA-JNGUvfw5oSM9BVuouMZWFn" \
-                   "FU7Ul5PaPzH-7BYlDsvmAMKAdeQcCy6s1GGOfb-49x7O58C7cPbLMdxeRGkR879vWKvgalGB"
-google = Google(thisaccess_token)
+#thisaccess_token = "ya29.GltpBlJwAHXAd6rLFiy7Fdc5-q3FA-JNGUvfw5oSM9BVuouMZWFn" \
+ #                  "FU7Ul5PaPzH-7BYlDsvmAMKAdeQcCy6s1GGOfb-49x7O58C7cPbLMdxeRGkR879vWKvgalGB"
+#google = Google(thisaccess_token)
 
-print(google.MessageList())
-print(google.EventList())
+#print(google.MessageList())
+#print(google.EventList())
 
 
 
