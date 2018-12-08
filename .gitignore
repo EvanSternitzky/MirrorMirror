@@ -2,7 +2,7 @@ CapstoneII/credentials.json
 CapstoneII/token.json
 CapstoneII/api_keys/
 
-CapstoneII/conf/
+CapstoneII/conf/settings.json
 *.json
 
 # Byte-compiled / optimized / DLL files
