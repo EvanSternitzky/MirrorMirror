@@ -7,6 +7,7 @@ class Weather:
     results = []
     def __init__(self, locations):
         self.results = []
+        self.r = None
         for location in locations:
             print("Making request for ", location)
             if location["LocationCode"] == 1:
@@ -15,11 +16,11 @@ class Weather:
                 self.r = requests.get(self.api_url, params={'lat': lat, 'lon': long, 'appid': self.api_key, 'units': 'imperial'})	
             elif location["LocationCode"] == 0:
                 zip = location["ZipCode"]
-                self.r = requests.get(self.api_url, params={'zip': zip + ',us', appid: self.api_key, 'units': 'imperial'})
+                self.r = requests.get(self.api_url, params={'zip': zip + ',us', 'appid': self.api_key, 'units': 'imperial'})
             elif location["LocationCode"] == 2:
-                city = locations["City"]
+                city = location["City"]
                 country = location["Country"]
-                self.r = requests.get(self.api_url, params={'q': city +',' + country, appid: self.api_key, 'units': 'imperial'})
+                self.r = requests.get(self.api_url, params={'q': city +',' + country, 'appid': self.api_key, 'units': 'imperial'})
             print(self.r.text)
             r_j = json.loads(self.r.text)
             self.results.append(r_j)

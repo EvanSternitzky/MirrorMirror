@@ -1,19 +1,21 @@
 
 from googleapiclient.discovery import build
 import google.oauth2.credentials
+import google.auth.transport.requests
+import requests
 
 class Google:
-    def __init__(self, *access_token, ref_token, scope):
-        if(access_token is not None):
-            self.configure(access_token, ref_token, scope)
+    def __init__(self, *args):
+        if(args is not None):
+            self.configure(args[0], args[1], args[2])
+            print('ARGS SUPPLIED: ', args)
 
-    def configure(self, access_token, ref_token, scope):
-        self.access_token = access_token[0]
+    def configure(self, *args):
+        self.access_token = args[0]
         print(self.access_token)
-        self.credentials = google.oauth2.credentials.Credentials(self.access_token, refresh_token=ref_token, scopes=scope.split(" "))
+        self.credentials = google.oauth2.credentials.Credentials(self.access_token, refresh_token=args[1], scopes=args[2])
         self.mail_service = build('gmail', 'v1', credentials=self.credentials)
         self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
-
     def ListMessagesMatchingQuery(self, query=''):
         """List all Messages of the user's mailbox matching the query.
 
@@ -82,6 +84,9 @@ class Google:
     def MessageList(self):
         MessageArray = []
         try:
+            if self.credentials.expired:
+                request = google.auth.transport.requests.Request()
+                self.credentials.refresh(request)
             response = self.ListMessagesMatchingQuery()
             for message in response:
                 full_message = self.GetMessage(message['id'])
@@ -102,6 +107,9 @@ class Google:
     def EventList(self):
         EventArray =[]
         try:
+            if self.credentials.expired:
+                request = google.auth.transport.requests.Request()
+                self.credentials.refresh(request)
             events = self.ListCalendatItems()
 
             for i in range(0,5):

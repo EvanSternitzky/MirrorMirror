@@ -377,15 +377,17 @@ try:
         def get_google_text(emails, events):
             email_text = ""
             event_text = ""
-            for email in emails:
-                email_text += email.get('summary') + '\n' + email.get('from') + '\n\n'
-            for event in events:
-                time = event.get('time')
-                gdate = time.get('date')
-                if gdate == None:
-                    gdate = time.get('dateTime')
-                summ = event.get('summary')
-                event_text += gdate + '\n' + summ + '\n\n'
+            if emails != None:
+                for email in emails:
+                    email_text += email.get('summary') + '\n' + email.get('from') + '\n\n'
+            if events != None:
+                for event in events:
+                    time = event.get('time')
+                    gdate = time.get('date')
+                    if gdate == None:
+                        gdate = time.get('dateTime')
+                    summ = event.get('summary')
+                    event_text += gdate + '\n' + summ + '\n\n'
             return (email_text, event_text)
  
         def google_update(token, ref_token, scopes):
@@ -413,7 +415,9 @@ try:
             events = ""
             try:
                 if google_info != None:
-                    (emails, events) = google_update(google_info[0]["AccessToken"], google_info[0]["RefreshToken"], google_info[0]["Scope"])
+                    scopes = google_info[0]["Scope"].split(" ")
+                    print('SCOPES: ', scopes)
+                    (emails, events) = google_update(google_info[0]["AccessToken"], google_info[0]["RefreshToken"], scopes)
                     print(emails)
                     print(events)
             except Exception as ex:
