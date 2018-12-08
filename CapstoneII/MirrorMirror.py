@@ -244,7 +244,7 @@ try:
 
     #Time_Date_Greeting_Grid Section- WORKING!
     global Box1
-    Box1 = Box(app,layout="grid", grid=Time_Date_Greeting_Grid, visible=Time_Date_Greeting_Visible)
+    Box1 = Box(app,layout="grid", grid=Time_Date_Greeting_Grid, visible=Time_Date_Greeting_Visible,)
     if(now.strftime("%H") == "03" or now.strftime("%H") == "04" or now.strftime("%H") == "05" or now.strftime("%H") == "06" or now.strftime("%H") == "07" or now.strftime("%H") == "08" or now.strftime("%H") == "09" or now.strftime("%H") == "10" or now.strftime("%H") == "11"):
         display_clock = Text(Box1, text = clock, grid=[0,0], color="white", size="35")
         display_date = Text(Box1, text = date, grid=[0,1], color="white", size="35")
@@ -272,28 +272,25 @@ try:
     calDraw.text((20,20), calFormat, fill=(255,255,255))
     calImage.save('MonthCalandar.png'),
     
-    Box2 = Box(app, grid=Calendar_Grid, visible = Calendar_Visible)
+    Box2 = Box(app, grid=Calendar_Grid, visible = Calendar_Visible, align="left")
     #display_calendar = Text(Box2, text = calFormat, color="white", size="15")
     display_calendar = Picture(Box2, image="MonthCalandar.png")
     
     
     #Emails and Events
-    Box3 = Box(app, grid = Email_Grid, visible = Emails_Visible)
+    Box3 = Box(app, grid = Email_Grid, align="left", visible = Emails_Visible)
     #for email in emails:
         #display_emails = Text(Box3, text = , grid=[0,0], color="white", size="20")
         
     Box4 = Box(app, grid = Events_Grid, visible = Events_Visible, align = "left")
     #display_events = Text(Box4, text = , grid=[0,0], color="white", size="20")
 
-    Box5 = Box(app, layout="grid", grid=[1,1], visible=True)
+    Box5 = Box(app, layout="grid", align="left", grid=[1,0], visible=True)
 
     #Updating and Fxn Call Section
     app.repeat(100,RestartAndShutdownTest)
     app.repeat(100, ButtonTesting)
     app.repeat(500,update)
-    #access_token =  "ya29.GltrBt6Z38EXSpkETvrn3GYZYbXbvJC6f9cJqJM54A__57zB1mI1I2cLvwockccCRnvyCCnq9X3grxJWCMu-BV4ObYdvJKPaEjVGszy_QtYSDOIc-YDHPoDXl1f_"
-    #app.repeat(100000, google_update(access_token))
-    #app.repeat(50000, read_settings)
     
     #sets full screen-Makes debug hard. To Get out: CTR+ALT+D
     app.tk.attributes("-fullscreen", True)
@@ -302,48 +299,104 @@ try:
     q3 = "Test3"
     q4 = "Test4"
     q5 = "Test5"
-    Text1 = Text(Box1, text=q1, grid=[1, 0], color="white", size="10", align="left")
-    Text2 = Text(Box2, text=q2, grid=[1, 0], color="white", size="10", align="left")
+    Text1 = Text(Box1, text=q1, grid=[1, 0], color="white", size="10", align="right")
+    Text2 = Text(Box2, text=q2, grid=[0, 0], color="white", size="10", align="left")
     Text3 = Text(Box3, text=q3, grid=[1, 0], color="white", size="10", align="left")
     Text4 = Text(Box4, text=q4, grid=[1, 0], color="white", size="10", align="left")
     Text5 = Text(Box5, text=q5, grid=[1, 0], color="white", size="10", align="left")
     #nocursor is not working to turn cursor to be invisible.
     #will need to find something else to make it invisible or move position to side/corner
+
     def start_listening():
 
-        def update_quads(bindings, quads):
-            if quads[0]['ItemType'] != None:
-                q1 = bindings.get(quads[0]['ItemType'])
-                Text4.value = q1
-                #print(bindings.get(quads[0]['ItemType']))
-            if quads[1]['ItemType'] != None:
-                q2 = bindings.get(quads[1]['ItemType'])
-                Text2.value = q2
-               # print(bindings.get(quads[1]['ItemType']))
-            if quads[2]['ItemType'] != None:
-                q3 = bindings.get(quads[2]['ItemType'])
-                Text3.value = q3
-               # print(bindings.get(quads[2]['ItemType']))
-            if quads[3]['ItemType'] != None:
-                q4 = bindings.get(quads[3]['ItemType'])
-                Text4.value = q4
-               # print(bindings.get(quads[3]['ItemType']))
-            if quads[4]['ItemType'] != None:
-                q5 = bindings.get(quads[4]['ItemType'])
-                Text5.value = q5
-               # print(bindings.get(quads[4]['ItemType']))
+        def create_weather_grid(weather, quad):
+            boxes = { 1: Box4, 2: Box2, 3: Box3, 4: Box4, 5: Box5 }
+            pics = { 'clear sky': 'sun.png', 'few clouds': 'partlyCloudy.png', 'scattered clouds': 'partlyCloudy.png', 'broken clouds': 'partlyCloudy.png', 'shower rain': 'rain.png', 'rain': 'rain.png', 'thunderstorm': 'storm.png', 'snow': 'snow.png', 'mist': 'misty.png' }
+            x = 0
+            y = 0
+            box = boxes.get(quad)
+            print('weather len: ', len(weather))
+            for w in weather:
+                loc = w.get('name')
+                print('name = ', loc)
+                print('x = ', x, ' y = ', y)
+                Text(boxes.get(quad), text=loc, grid=[y,x], color="white", size="8")
+                x += 1
+                print('x = ', x, ' y = ', y)
+                pic_dec = w.get('weather')[0].get('description')
+                print('Using pic_Dec: ', pic_dec)
+                pic = pics.get(pic_dec)
+                print('Using pic', pic)
+                Picture(boxes.get(quad), image=pic, grid=[y, x])
+                x += 1
+                print('x = ', x, ' y = ', y)
+                temp = w.get('main').get('temp')
+                print('temp = ', temp)
+                Text(boxes.get(quad), text=temp, grid=[y,x], color="white", size="8")
+                x += 1
+                y += 1
+                print('x = ', x, ' y = ', y)
 
-        def google_update(token):
-            print(token)
-            #global emails, events
-            goog = Google(token)
-            emails = goog.MessageList()
-            events = goog.EventList()
-            #Email Updating
+        def update_quads(bindings, quads):
+            q1i = quads[0]['ItemType']
+            q2i = quads[1]['ItemType']
+            q3i = quads[2]['ItemType']
+            q4i = quads[3]['ItemType']
+            q5i = quads[4]['ItemType']
+            if q1i != None:
+                q1 = bindings.get(q1i)
+                if q1i == 'Weather Locations':
+                    create_weather_grid(q1, 1)
+                else:
+                    Text4.value = q1
+            if q2i != None:
+                q2 = bindings.get(q2i)
+                if q2i == 'Weather Locations':
+                    create_weather_grid(q2, 2)
+                else:
+                    Text2.value = q2
+            if q3i != None:
+                q3 = bindings.get(q3i)
+                if q3i == 'Weather Locations':
+                    create_weather_grid(q3, 3)
+                else:
+                    Text3.value = q3
+            if q4i != None:
+                q4 = bindings.get(q4i)
+                if q4i == 'Weather Locations':
+                    create_weather_grid(q4, 4)
+                else:
+                    Text4.value = q4
+            if q5i != None:
+                q5 = bindings.get(q5i)
+                if q5i == 'Weather Locations':
+                    create_weather_grid(q5, 5)
+                else:
+                    Text5.value = q5
+
+        def get_google_text(emails, events):
+            email_text = ""
+            event_text = ""
+            for email in emails:
+                email_text += email.get('summary') + '\n' + email.get('from') + '\n\n'
+            for event in events:
+                time = event.get('time')
+                gdate = time.get('date')
+                if gdate == None:
+                    gdate = time.get('dateTime')
+                summ = event.get('summary')
+                event_text += gdate + '\n' + summ + '\n\n'
+            return (email_text, event_text)
+ 
+        def google_update(token, ref_token, scopes):
             try:
-                return (emails, events)
-                #not working
-                #display_emails= Text(Box3, text = emails[0]['summary'], grid=[0,0], color="white", size="20")
+                print(token)
+                #global emails, events
+                goog = Google(token, ref_token, scopes)
+                emails = goog.MessageList()
+                events = goog.EventList()
+                #Email Updating
+                return get_google_text(emails, events)
             except:
                 print("error", flush = True)
 
@@ -358,9 +411,15 @@ try:
             feed_text = RssFeed(rss_feeds).get_entries()
             emails = ""
             events = ""
-            if google_info != None:
-                (emails, events) = google_update(google_info[0]["AccessToken"])
-            bindings = {"RSS Feeds": feed_text}
+            try:
+                if google_info != None:
+                    (emails, events) = google_update(google_info[0]["AccessToken"], google_info[0]["RefreshToken"], google_info[0]["Scope"])
+                    print(emails)
+                    print(events)
+            except Exception as ex:
+                print(ex)
+            weather_svc = Weather(weather_locs)
+            bindings = {"RSS Feeds": feed_text, "Email": emails, "Calendar": events, "Weather Locations": weather_svc.results}
             update_quads(bindings, quads)
             lock.release()
         msg = MessageParser(msg_callback)

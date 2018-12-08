@@ -3,14 +3,14 @@ from googleapiclient.discovery import build
 import google.oauth2.credentials
 
 class Google:
-    def __init__(self, *access_token):
+    def __init__(self, *access_token, ref_token, scope):
         if(access_token is not None):
-            self.configure(access_token)
+            self.configure(access_token, ref_token, scope)
 
-    def configure(self, access_token):
+    def configure(self, access_token, ref_token, scope):
         self.access_token = access_token[0]
         print(self.access_token)
-        self.credentials = google.oauth2.credentials.Credentials(self.access_token)
+        self.credentials = google.oauth2.credentials.Credentials(self.access_token, refresh_token=ref_token, scopes=scope.split(" "))
         self.mail_service = build('gmail', 'v1', credentials=self.credentials)
         self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
 
@@ -72,7 +72,7 @@ class Google:
     def ListCalendatItems(self):
         page_token = None
         while True:
-            events = self.calendar_service.events().list(calendarId='primary', pageToken=page_token, maxResults=10, orderBy='startTime').execute()
+            events = self.calendar_service.events().list(calendarId='primary', pageToken=page_token, maxResults=10).execute()
             return events
 
             page_token = events.get('nextPageToken')
@@ -116,6 +116,7 @@ class Google:
             print("Error: EventList {0}".format(ex))
         return EventArray
 
+        
 # Sample usage
 #thisaccess_token = "ya29.GltrBt6Z38EXSpkETvrn3GYZYbXbvJC6f9cJqJM54A__57zB1mI1I2cLvwockccCRnvyCCnq9X3grxJWCMu-BV4ObYdvJKPaEjVGszy_QtYSDOIc-YDHPoDXl1f_"
 #goog = Google()
