@@ -3,6 +3,7 @@ CapstoneII/token.json
 CapstoneII/api_keys/
 
 CapstoneII/conf/
+*.json
 
 # Byte-compiled / optimized / DLL files
 CapstoneII/__pycache__/
