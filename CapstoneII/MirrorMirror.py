@@ -66,7 +66,7 @@ Emails_Visible = 1
 Events_Visible = 1
 
 #construct google object
-goog = Google()
+#goog = Google()
 
 global now, display_clock, display_date, clock, date, display_emails, display_events, emails, events, access_token
 now = datetime.datetime.now()
@@ -336,7 +336,7 @@ try:
         def google_update(token):
             print(token)
             #global emails, events
-            goog.configure(token)
+            goog = Google(token)
             emails = goog.MessageList()
             events = goog.EventList()
             #Email Updating

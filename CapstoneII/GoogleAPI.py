@@ -8,8 +8,9 @@ class Google:
             self.configure(access_token)
 
     def configure(self, access_token):
-        self.access_token = access_token
-        self.credentials = google.oauth2.credentials.Credentials(access_token)
+        self.access_token = access_token[0]
+        print(self.access_token)
+        self.credentials = google.oauth2.credentials.Credentials(self.access_token)
         self.mail_service = build('gmail', 'v1', credentials=self.credentials)
         self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
 
@@ -71,7 +72,7 @@ class Google:
     def ListCalendatItems(self):
         page_token = None
         while True:
-            events = self.calendar_service.events().list(calendarId='primary', pageToken=page_token).execute()
+            events = self.calendar_service.events().list(calendarId='primary', pageToken=page_token, maxResults=10, orderBy='startTime').execute()
             return events
 
             page_token = events.get('nextPageToken')
@@ -93,8 +94,8 @@ class Google:
                         }
                         MessageArray.append(NewDictionaryItem)
 
-        except:
-            print("Error: MessageList")
+        except Exception as ex:
+            print("Error: MessageList {0}".format(ex))
 
         return MessageArray
 
@@ -111,8 +112,8 @@ class Google:
                     'time': item.get('start', 'No Time')
                 }
                 EventArray.append(NewDictionaryItem)
-        except:
-            print("Error: EventList")
+        except Exception as ex:
+            print("Error: EventList {0}".format(ex))
         return EventArray
 
 # Sample usage

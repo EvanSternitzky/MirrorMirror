@@ -2,8 +2,10 @@ CapstoneII/credentials.json
 CapstoneII/token.json
 CapstoneII/api_keys/
 
+CapstoneII/conf/
+
 # Byte-compiled / optimized / DLL files
-__pycache__/
+CapstoneII/__pycache__/
 *.py[cod]
 *$py.class
 
