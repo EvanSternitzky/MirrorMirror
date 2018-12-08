@@ -5,15 +5,18 @@ import datetime
 import calendar
 import RPi.GPIO as GPIO
 import time
+import shutil
 from msg_parser import MessageParser
 from filelock import Timeout, FileLock
 import tkinter
 import threading
 from rss import RssFeed
+import requests
 from weather import Weather
 import json
 from PIL import Image, ImageDraw, ImageFont
 from GoogleAPI import Google
+from pathlib import Path
 
 settings_file = "./conf/settings.json"
 
@@ -306,36 +309,44 @@ try:
     Text5 = Text(Box5, text=q5, grid=[1, 0], color="white", size="10", align="left")
     #nocursor is not working to turn cursor to be invisible.
     #will need to find something else to make it invisible or move position to side/corner
-
+    weather_grid = []
     def start_listening():
 
         def create_weather_grid(weather, quad):
             boxes = { 1: Box4, 2: Box2, 3: Box3, 4: Box4, 5: Box5 }
-            pics = { 'clear sky': 'sun.png', 'few clouds': 'partlyCloudy.png', 'scattered clouds': 'partlyCloudy.png', 'broken clouds': 'partlyCloudy.png', 'shower rain': 'rain.png', 'rain': 'rain.png', 'thunderstorm': 'storm.png', 'snow': 'snow.png', 'mist': 'misty.png' }
             x = 0
             y = 0
             box = boxes.get(quad)
+            if len(weather_grid) > 0:
+                weather_grid.clear()
             print('weather len: ', len(weather))
             for w in weather:
                 loc = w.get('name')
                 print('name = ', loc)
                 print('x = ', x, ' y = ', y)
-                Text(boxes.get(quad), text=loc, grid=[y,x], color="white", size="8")
+                loc_t = Text(boxes.get(quad), text=loc, grid=[y,x], color="white", size="8")
                 x += 1
                 print('x = ', x, ' y = ', y)
-                pic_dec = w.get('weather')[0].get('description')
-                print('Using pic_Dec: ', pic_dec)
-                pic = pics.get(pic_dec)
-                print('Using pic', pic)
-                Picture(boxes.get(quad), image=pic, grid=[y, x])
+                icon_name = w.get('weather')[0].get('icon') + ".png"
+                ico = Path("./" + icon_name)
+                if not ico.is_file():
+                    pic_url = "http://openweathermap.org/img/w/" + icon_name
+                    print("Pic url: ", pic_url)
+                    pic_r = requests.get(pic_url, stream=True)
+                    if pic_r.status_code == 200:
+                        with open(icon_name, 'wb') as f:
+                            for chunk in pic_r:
+                                f.write(chunk)
+                pic_t = Picture(boxes.get(quad), image=icon_name, grid=[y, x])
                 x += 1
                 print('x = ', x, ' y = ', y)
                 temp = w.get('main').get('temp')
                 print('temp = ', temp)
-                Text(boxes.get(quad), text=temp, grid=[y,x], color="white", size="8")
+                temp_t = Text(boxes.get(quad), text=temp, grid=[y,x], color="white", size="8")
                 x += 1
                 y += 1
                 print('x = ', x, ' y = ', y)
+                weather_grid.extend((loc_t, pic_t, temp_t))
 
         def update_quads(bindings, quads):
             q1i = quads[0]['ItemType']
@@ -390,11 +401,11 @@ try:
                     event_text += gdate + '\n' + summ + '\n\n'
             return (email_text, event_text)
  
-        def google_update(token, ref_token, scopes):
+        def google_update(token, ref_token):
             try:
                 print(token)
                 #global emails, events
-                goog = Google(token, ref_token, scopes)
+                goog = Google(token, ref_token)
                 emails = goog.MessageList()
                 events = goog.EventList()
                 #Email Updating
@@ -415,9 +426,9 @@ try:
             events = ""
             try:
                 if google_info != None:
-                    scopes = google_info[0]["Scope"].split(" ")
-                    print('SCOPES: ', scopes)
-                    (emails, events) = google_update(google_info[0]["AccessToken"], google_info[0]["RefreshToken"], scopes)
+                    #scopes = google_info[0]["Scope"].split(" ")
+                    #print('SCOPES: ', scopes)
+                    (emails, events) = google_update(google_info[0]["AccessToken"], google_info[0]["RefreshToken"])
                     print(emails)
                     print(events)
             except Exception as ex:

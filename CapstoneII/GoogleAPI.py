@@ -7,13 +7,15 @@ import requests
 class Google:
     def __init__(self, *args):
         if(args is not None):
-            self.configure(args[0], args[1], args[2])
+            self.configure(args[0], args[1])
             print('ARGS SUPPLIED: ', args)
 
     def configure(self, *args):
         self.access_token = args[0]
         print(self.access_token)
-        self.credentials = google.oauth2.credentials.Credentials(self.access_token, refresh_token=args[1], scopes=args[2])
+        #self.credentials = google.oauth2.credentials.Credentials(self.access_token, refresh_token=args[1], scopes=['https://www.googleapis.com/auth/plus.me', 'https://mail.google.com/', 'https://www.googleapis.com/auth/calendar.readonly'])
+        self.credentials = google.oauth2.credentials.Credentials.from_authorized_user_file('credentials.json', scopes=['https://www.googleapis.com/auth/plus.me', 'https://mail.google.com/', 'https://www.googleapis.com/auth/calendar.readonly'])
+        self.credentials.refresh_token = args[1]
         self.mail_service = build('gmail', 'v1', credentials=self.credentials)
         self.calendar_service = build('calendar', 'v3', credentials=self.credentials)
     def ListMessagesMatchingQuery(self, query=''):
