@@ -13,7 +13,7 @@ from rss import RssFeed
 from weather import Weather
 import json
 from PIL import Image, ImageDraw, ImageFont
-#from GoogleAPI import Google
+from GoogleAPI import Google
 
 settings_file = "./conf/settings.json"
 
@@ -65,7 +65,10 @@ Calendar_Visible = 1
 Emails_Visible = 1
 Events_Visible = 1
 
-global now, display_clock, display_date, clock, date, display_emails, display_events
+#construct google object
+goog = Google()
+
+global now, display_clock, display_date, clock, date, display_emails, display_events, emails, events, access_token
 now = datetime.datetime.now()
 clock = now.strftime("%I:%M %p")
 date = now.strftime("%a %b-%d, %Y")
@@ -75,35 +78,37 @@ rss_feeds = []
 emails = []
 events = []
 
-def read_settings():
-    lock = FileLock(settings_file + ".lock", timeout=2)
-    try:
-        with lock:
-            with open(settings_file, 'r') as settings:
-                settings_val = json.loads(settings.read())
-                print(settings_val)
-                rss_feeds = []
-                try:
-                    rss_feeds = RssFeed(settings_val["RssFeeds"])
-                except:
-                    print("Problem reading rss feeds")
-                print("Received RSS Feeds.")
-                weather_locs = []
-                for locations in settings_val["WeatherLocations"]:
-                    print(locations)
-                    loc = Weather(locations).get_results()
-                    weather_locs.append(loc)
-                    print(loc)
-    except Timeout: print("failed to acquire lock")
-    finally:
-        lock.release()
+#def read_settings():
+#    lock = FileLock(settings_file + ".lock", timeout=2)
+#    try:
+#        with lock:
+#            with open(settings_file, 'r') as settings:
+#                settings_val = json.loads(settings.read())
+#                print(settings_val)
+#                rss_feeds = []
+#                try:
+#                    rss_feeds = RssFeed(settings_val["RssFeeds"])
+#                except:
+#                    print("Problem reading rss feeds")
+ #               print("Received RSS Feeds.")
+ #               weather_locs = []
+ ##               for locations in settings_val["WeatherLocations"]:
+  #                  print(locations)
+  #                  loc = Weather(locations).get_results()
+  #                  weather_locs.append(loc)
+  #                  print(loc)
+  #              
+  #              access_token = settings_val['GoogleInfo']['AccessToken']
+  #              print(access_token)
+  #  except Timeout: print("failed to acquire lock")
+  #  finally:
+  #      lock.release()
 
-#class CursorOff(object)
-#    def _enter_(self):
-#        os.system('setterm -cursor off')
-#
-#    def _exit_(self,*args):
-#        os.system('setterm -cursor on')
+
+    #Events Updating
+    #   display_events = Text(Box4, text = , grid=[0,0], color="white", size="20")
+
+
 
 def update():
     global year, month
@@ -152,22 +157,15 @@ def update():
         #display_calendar = Text(Box2, text = calFormat, color="white", size="15")
         display_calendar = Picture(Box2, image="MonthCalandar.png")
     
-    #Email Updating
-    #for email in emails:
-        #display_emails= Text(Box3, text = , grid=[0,0], color="white", size="20")
-        
-    #Events Updating
-    #display_events = Text(Box4, text = , grid=[0,0], color="white", size="20")
-
 def RestartAndShutdownTest():
     #Reboot Control
     if GPIO.input(12)==GPIO.HIGH:
-        print("Reboot Initiated")
+        print("Reboot Initiated", flush=True)
         os.system("sudo reboot -h now")
     #Shutdown Control - Deciding on buttons to press
         #makes Sense to press reboot button and the LED button to Shutdown
     if GPIO.input(26)==GPIO.HIGH and GPIO.input(21)==GPIO.HIGH:
-        print("Shutdown Initiated")
+        print("Shutdown Initiated", flush=True)
         os.system("sudo shutdown -h now")
 
 def ButtonTesting():
@@ -177,60 +175,60 @@ def ButtonTesting():
     
     if GPIO.input(26)==GPIO.HIGH and lastPressLED ==0:
         lastPressLED = 1
-        print("Button Pressed - LEDS ON")
+        print("Button Pressed - LEDS ON", flush=True)
         GPIO.output(19, GPIO.HIGH)
         time.sleep(.5)
 
     if GPIO.input(26)==GPIO.HIGH and lastPressLED ==1:
         lastPressLED = 0
-        print("Button Pressed - LEDS OFF")
+        print("Button Pressed - LEDS OFF", flush=True)
         GPIO.output(19, GPIO.LOW)
         time.sleep(.5)
         
     #Button 2    
     if GPIO.input(21)==GPIO.HIGH and lastPress2==0:
         lastPress2=1
-        print("Button 2 Pressed- Monitor ON")
+        print("Button 2 Pressed- Monitor ON", flush=True)
         os.system("vcgencmd display_power 0")
         time.sleep(.5)
         
     if GPIO.input(21)==GPIO.HIGH and lastPress2==1:
         lastPress2=0
-        print("Button 2 Pressed- Monitor OFF")
+        print("Button 2 Pressed- Monitor OFF", flush=True)
         os.system("vcgencmd display_power 1")
         time.sleep(.5)
     
     #Button 3    
     if GPIO.input(20)==GPIO.HIGH and lastPress3==0:
         lastPress3=1
-        print("Button 3 Pressed- Switch ON")
+        print("Button 3 Pressed- Switch ON", flush=True)
         time.sleep(.5)
         
     if GPIO.input(20)==GPIO.HIGH and lastPress3==1:
         lastPress3=0
-        print("Button 3 Pressed- Switch OFF")
+        print("Button 3 Pressed- Switch OFF", flush=True)
         time.sleep(.5)
     
     #Button 4    
     if GPIO.input(16)==GPIO.HIGH and lastPress4==0:
         lastPress4=1
-        print("Button 4 Pressed- Switch ON")
+        print("Button 4 Pressed- Switch ON", flush=True)
         time.sleep(.5)
         
     if GPIO.input(16)==GPIO.HIGH and lastPress4==1:
         lastPress4=0
-        print("Button 4 Pressed- Switch OFF")
+        print("Button 4 Pressed- Switch OFF", flush=True)
         time.sleep(.5)
         
     #Button 5    
     if GPIO.input(12)==GPIO.HIGH and lastPress5==0:
         lastPress5=1
-        print("Button 5 Pressed- Switch ON")
+        print("Button 5 Pressed- Switch ON", flush=True)
         time.sleep(.5)
         
     if GPIO.input(12)==GPIO.HIGH and lastPress5==1:
         lastPress5=0
-        print("Button 5 Pressed- Switch OFF")
+        print("Button 5 Pressed- Switch OFF", flush=True)
         time.sleep(.5)
 
 #os.system('setterm -cursor off')
@@ -293,6 +291,8 @@ try:
     app.repeat(100,RestartAndShutdownTest)
     app.repeat(100, ButtonTesting)
     app.repeat(500,update)
+    #access_token =  "ya29.GltrBt6Z38EXSpkETvrn3GYZYbXbvJC6f9cJqJM54A__57zB1mI1I2cLvwockccCRnvyCCnq9X3grxJWCMu-BV4ObYdvJKPaEjVGszy_QtYSDOIc-YDHPoDXl1f_"
+    #app.repeat(100000, google_update(access_token))
     #app.repeat(50000, read_settings)
     
     #sets full screen-Makes debug hard. To Get out: CTR+ALT+D
@@ -302,11 +302,11 @@ try:
     q3 = "Test3"
     q4 = "Test4"
     q5 = "Test5"
-    Text1 = Text(Box1, text=q1, grid=[0, 2], color="white", size="12", align="left")
-    Text2 = Text(Box2, text=q2, grid=[1, 1], color="white", size="12", align="left")
-    Text3 = Text(Box3, text=q3, grid=[1, 1], color="white", size="12", align="left")
-    Text4 = Text(Box4, text=q4, grid=[1, 1], color="white", size="12", align="left")
-    Text5 = Text(Box5, text=q5, grid=[1, 1], color="white", size="12", align="left")
+    Text1 = Text(Box1, text=q1, grid=[1, 0], color="white", size="10", align="left")
+    Text2 = Text(Box2, text=q2, grid=[1, 0], color="white", size="10", align="left")
+    Text3 = Text(Box3, text=q3, grid=[1, 0], color="white", size="10", align="left")
+    Text4 = Text(Box4, text=q4, grid=[1, 0], color="white", size="10", align="left")
+    Text5 = Text(Box5, text=q5, grid=[1, 0], color="white", size="10", align="left")
     #nocursor is not working to turn cursor to be invisible.
     #will need to find something else to make it invisible or move position to side/corner
     def start_listening():
@@ -315,23 +315,37 @@ try:
             if quads[0]['ItemType'] != None:
                 q1 = bindings.get(quads[0]['ItemType'])
                 Text4.value = q1
-                print(bindings.get(quads[0]['ItemType']))
+                #print(bindings.get(quads[0]['ItemType']))
             if quads[1]['ItemType'] != None:
                 q2 = bindings.get(quads[1]['ItemType'])
                 Text2.value = q2
-                print(bindings.get(quads[1]['ItemType']))
+               # print(bindings.get(quads[1]['ItemType']))
             if quads[2]['ItemType'] != None:
                 q3 = bindings.get(quads[2]['ItemType'])
                 Text3.value = q3
-                print(bindings.get(quads[2]['ItemType']))
+               # print(bindings.get(quads[2]['ItemType']))
             if quads[3]['ItemType'] != None:
                 q4 = bindings.get(quads[3]['ItemType'])
                 Text4.value = q4
-                print(bindings.get(quads[3]['ItemType']))
+               # print(bindings.get(quads[3]['ItemType']))
             if quads[4]['ItemType'] != None:
                 q5 = bindings.get(quads[4]['ItemType'])
                 Text5.value = q5
-                print(bindings.get(quads[4]['ItemType']))
+               # print(bindings.get(quads[4]['ItemType']))
+
+        def google_update(token):
+            print(token)
+            #global emails, events
+            goog.configure(token)
+            emails = goog.MessageList()
+            events = goog.EventList()
+            #Email Updating
+            try:
+                return (emails, events)
+                #not working
+                #display_emails= Text(Box3, text = emails[0]['summary'], grid=[0,0], color="white", size="20")
+            except:
+                print("error", flush = True)
 
         def msg_callback(body):
             lock = threading.Lock()
@@ -342,6 +356,10 @@ try:
             weather_locs = json_data["WeatherLocations"]
             google_info = json_data["GoogleInfo"]
             feed_text = RssFeed(rss_feeds).get_entries()
+            emails = ""
+            events = ""
+            if google_info != None:
+                (emails, events) = google_update(google_info[0]["AccessToken"])
             bindings = {"RSS Feeds": feed_text}
             update_quads(bindings, quads)
             lock.release()

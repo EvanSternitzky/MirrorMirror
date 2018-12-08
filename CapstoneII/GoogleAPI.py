@@ -116,16 +116,15 @@ class Google:
         return EventArray
 
 # Sample usage
-# thisaccess_token = "ya29.GltrBtwsO65JZVcA7Y1tA_I-iR0J3LbXHiZgsV3nvIl2huRfxJARPDwdcPExJ0GvZj9bsXiWP3bQ9cuN1" \
-#                    "VkRDQjpcUEcA2Z7zwRAuWm4gB8QeFBX6QGngJJ3sGvA"
-# goog = Google()
-#
-# print("check")
-#
-# goog.configure(thisaccess_token)
-#
-# print(goog.MessageList())
-# print(goog.EventList())
+#thisaccess_token = "ya29.GltrBt6Z38EXSpkETvrn3GYZYbXbvJC6f9cJqJM54A__57zB1mI1I2cLvwockccCRnvyCCnq9X3grxJWCMu-BV4ObYdvJKPaEjVGszy_QtYSDOIc-YDHPoDXl1f_"
+#goog = Google()
+
+#print("check")
+
+#goog.configure(thisaccess_token)
+
+#print(goog.MessageList())
+#print(goog.EventList())
 
 
 
