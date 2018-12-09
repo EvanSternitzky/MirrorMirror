@@ -294,61 +294,48 @@ try:
     app.repeat(100,RestartAndShutdownTest)
     app.repeat(100, ButtonTesting)
     app.repeat(500,update)
-    
+
     #sets full screen-Makes debug hard. To Get out: CTR+ALT+D
     app.tk.attributes("-fullscreen", True)
-    q1 = "Test1"
-    q2 = "Test2"
-    q3 = "Test3"
-    q4 = "Test4"
-    q5 = "Test5"
-    Text1 = Text(Box1, text=q1, grid=[1, 0], color="white", size="10", align="right")
-    Text2 = Text(Box2, text=q2, grid=[0, 0], color="white", size="10", align="left")
-    Text3 = Text(Box3, text=q3, grid=[1, 0], color="white", size="10", align="left")
-    Text4 = Text(Box4, text=q4, grid=[1, 0], color="white", size="10", align="left")
-    Text5 = Text(Box5, text=q5, grid=[1, 0], color="white", size="10", align="left")
     #nocursor is not working to turn cursor to be invisible.
     #will need to find something else to make it invisible or move position to side/corner
     weather_grid = []
     def start_listening():
-
         def create_weather_grid(weather, quad):
             boxes = { 1: Box4, 2: Box2, 3: Box3, 4: Box4, 5: Box5 }
             x = 0
             y = 0
             box = boxes.get(quad)
-            if len(weather_grid) > 0:
-                weather_grid.clear()
-            print('weather len: ', len(weather))
+            children  = box.tk.winfo_children()
+            for c in children:
+                c.destroy()
             for w in weather:
+                box.show()
                 loc = w.get('name')
-                print('name = ', loc)
-                print('x = ', x, ' y = ', y)
-                loc_t = Text(boxes.get(quad), text=loc, grid=[y,x], color="white", size="8")
+                loc_t = Text(box, text=loc, grid=[y,x], color="white", size="8")
                 x += 1
-                print('x = ', x, ' y = ', y)
                 icon_name = w.get('weather')[0].get('icon') + ".png"
                 ico = Path("./" + icon_name)
                 if not ico.is_file():
                     pic_url = "http://openweathermap.org/img/w/" + icon_name
-                    print("Pic url: ", pic_url)
                     pic_r = requests.get(pic_url, stream=True)
                     if pic_r.status_code == 200:
                         with open(icon_name, 'wb') as f:
                             for chunk in pic_r:
                                 f.write(chunk)
-                pic_t = Picture(boxes.get(quad), image=icon_name, grid=[y, x])
+                pic_t = Picture(box, image=icon_name, grid=[y, x])
                 x += 1
-                print('x = ', x, ' y = ', y)
                 temp = w.get('main').get('temp')
-                print('temp = ', temp)
-                temp_t = Text(boxes.get(quad), text=temp, grid=[y,x], color="white", size="8")
+                temp_t = Text(box, text=temp, grid=[y,x], color="white", size="8")
                 x += 1
                 y += 1
-                print('x = ', x, ' y = ', y)
-                weather_grid.extend((loc_t, pic_t, temp_t))
 
         def update_quads(bindings, quads):
+            q1 = "Test1"
+            q2 = "Test2"
+            q3 = "Test3"
+            q4 = "Test4"
+            q5 = "Test5"
             q1i = quads[0]['ItemType']
             q2i = quads[1]['ItemType']
             q3i = quads[2]['ItemType']
@@ -359,31 +346,31 @@ try:
                 if q1i == 'Weather Locations':
                     create_weather_grid(q1, 1)
                 else:
-                    Text4.value = q1
+                    Text1 = Text(Box1, text=q1, grid=[0, 1], color="white", size="10")
             if q2i != None:
                 q2 = bindings.get(q2i)
                 if q2i == 'Weather Locations':
                     create_weather_grid(q2, 2)
                 else:
-                    Text2.value = q2
+                    Text2 = Text(Box2, text=q2, grid=[0, 0], color="white", size="10", align="left")
             if q3i != None:
                 q3 = bindings.get(q3i)
                 if q3i == 'Weather Locations':
                     create_weather_grid(q3, 3)
                 else:
-                    Text3.value = q3
+                    Text3 = Text(Box3, text=q3, grid=[1, 0], color="white", size="10", align="left")
             if q4i != None:
                 q4 = bindings.get(q4i)
                 if q4i == 'Weather Locations':
                     create_weather_grid(q4, 4)
                 else:
-                    Text4.value = q4
+                    Text4 = Text(Box4, text=q4, grid=[1, 0], color="white", size="10", align="left")
             if q5i != None:
                 q5 = bindings.get(q5i)
                 if q5i == 'Weather Locations':
                     create_weather_grid(q5, 5)
                 else:
-                    Text5.value = q5
+                    Text5 = Text(Box5, text=q5, grid=[1, 0], color="white", size="10", align="left")
 
         def get_google_text(emails, events):
             email_text = ""
