@@ -304,6 +304,7 @@ try:
         def clear_box_children():
             box1_children = Box1.tk.winfo_children()
             for c1 in box1_children:
+                print(c1)
                 c1.destroy()
             box2_children = Box2.tk.winfo_children()
             for c2 in box2_children:
