@@ -1,11 +1,19 @@
 
 from googleapiclient.discovery import build
 import google.oauth2.credentials
+import requests
+import json
 
 class Google:
+    refresh_url = "https://www.googleapis.com/oauth2/v4/token"
     def __init__(self, *args):
         if(args is not None):
             self.access_token = args[0]
+            if args[1] != None:
+                self.refresh_token = args[1]
+            if self.client_id == None:
+                with open('credentials.json') as f:
+                    self.client_id = json.load(f)['clientid']
             self.configure(self.access_token)
             print('ARGS SUPPLIED: ', args)
 
@@ -80,11 +88,19 @@ class Google:
             page_token = events.get('nextPageToken')
             if not page_token:
                 break
+    def send_refresh(self):
+        r = requests.post(self.refresh_url, data={'client_id': self.client_id, 'refresh_token': self.refresh_token, 'grant_type': 'refresh_token'})
+        self.access_token = json.loads(r.text)['access_token']
+        self.configure(self.access_token)
 
     def MessageList(self):
         MessageArray = []
         try:
+            if self.credentials.expired():
+                print("Refreshing access token.")
+                self.send_refresh()
             response = self.ListMessagesMatchingQuery()
+            print("RESPONSE FOR MESSAGES: ", response)
             for message in response:
                 full_message = self.GetMessage(message['id'])
                 headers = full_message['payload']['headers']
@@ -104,6 +120,9 @@ class Google:
     def EventList(self):
         EventArray =[]
         try:
+            if self.credentials.expired():
+                print("Refreshing access token.")
+                self.send_refresh()
             events = self.ListCalendatItems()
 
             for i in range(0,5):

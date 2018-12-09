@@ -304,8 +304,8 @@ try:
         def clear_box_children():
             box1_children = Box1.tk.winfo_children()
             for c1 in box1_children:
-                print(c1)
-                c1.destroy()
+                if c1.winfo_id() != display_clock.tk.winfo_id() and c1.winfo_id() != display_date.tk.winfo_id() and c1.winfo_id() != display_greeting.tk.winfo_id():
+                    c1.destroy()
             box2_children = Box2.tk.winfo_children()
             for c2 in box2_children:
                 c2.destroy()
@@ -320,15 +320,11 @@ try:
                 c5.destroy()
 
         def create_weather_grid(weather, quad):
-            boxes = { 1: Box4, 2: Box2, 3: Box3, 4: Box4, 5: Box5 }
+            boxes = { 1: Box4, 2: Box4, 3: Box3, 4: Box2, 5: Box5 }
             x = 0
             y = 0
             box = boxes.get(quad)
-            #children  = box.tk.winfo_children()
-            #for c in children:
-             #   c.destroy()
             for w in weather:
-                box.show()
                 loc = w.get('name')
                 loc_t = Text(box, text=loc, grid=[y,x], color="white", size="8")
                 x += 1
@@ -343,7 +339,7 @@ try:
                                 f.write(chunk)
                 pic_t = Picture(box, image=icon_name, grid=[y, x])
                 x += 1
-                temp = w.get('main').get('temp')
+                temp = "{0}{1} F".format(w.get('main').get('temp'), u"\u00B0")
                 temp_t = Text(box, text=temp, grid=[y,x], color="white", size="8")
                 x += 1
                 y += 1
@@ -371,7 +367,7 @@ try:
                 if q2i == 'Weather Locations':
                     create_weather_grid(q2, 2)
                 else:
-                    Text2 = Text(Box2, text=q2, grid=[0, 0], color="white", size="10", align="left")
+                    Text2 = Text(Box4, text=q2, grid=[0, 0], color="white", size="10", align="left")
             if q3i != None:
                 q3 = bindings.get(q3i)
                 if q3i == 'Weather Locations':
@@ -383,7 +379,7 @@ try:
                 if q4i == 'Weather Locations':
                     create_weather_grid(q4, 4)
                 else:
-                    Text4 = Text(Box4, text=q4, grid=[1, 0], color="white", size="10", align="left")
+                    Text4 = Text(Box2, text=q4, grid=[1, 0], color="white", size="10", align="left")
             if q5i != None:
                 q5 = bindings.get(q5i)
                 if q5i == 'Weather Locations':
@@ -394,6 +390,8 @@ try:
         def get_google_text(emails, events):
             email_text = ""
             event_text = ""
+            print(emails)
+            print(events)
             if emails != None:
                 for email in emails:
                     email_text += email.get('summary') + '\n' + email.get('from') + '\n\n'
@@ -404,7 +402,7 @@ try:
                     if gdate == None:
                         gdate = time.get('dateTime')
                     summ = event.get('summary')
-                    event_text += gdate + '\n' + summ + '\n\n'
+                    event_text += gdate.strftime("%H:%M:%S %p, %m/%d/%Y") + '\n' + summ + '\n\n'
             return (email_text, event_text)
  
         def google_update(token, ref_token):
@@ -439,6 +437,7 @@ try:
                     print(events)
             except Exception as ex:
                 print(ex)
+                print("Ex here")
             weather_svc = Weather(weather_locs)
             bindings = {"RSS Feeds": feed_text, "Email": emails, "Calendar": events, "Weather Locations": weather_svc.results}
             update_quads(bindings, quads)
