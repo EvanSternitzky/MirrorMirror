@@ -301,14 +301,31 @@ try:
     #will need to find something else to make it invisible or move position to side/corner
     weather_grid = []
     def start_listening():
+        def clear_box_children():
+            box1_children = Box1.tk.winfo_children()
+            for c1 in box1_children:
+                c1.destroy()
+            box2_children = Box2.tk.winfo_children()
+            for c2 in box2_children:
+                c2.destroy()
+            box3_children = Box3.tk.winfo_children()
+            for c3 in box3_children:
+                c3.destroy()
+            box4_children = Box4.tk.winfo_children()
+            for c4 in box4_children:
+                c4.destroy()
+            box5_children = Box5.tk.winfo_children()
+            for c5 in box5_children:
+                c5.destroy()
+
         def create_weather_grid(weather, quad):
             boxes = { 1: Box4, 2: Box2, 3: Box3, 4: Box4, 5: Box5 }
             x = 0
             y = 0
             box = boxes.get(quad)
-            children  = box.tk.winfo_children()
-            for c in children:
-                c.destroy()
+            #children  = box.tk.winfo_children()
+            #for c in children:
+             #   c.destroy()
             for w in weather:
                 box.show()
                 loc = w.get('name')
@@ -331,6 +348,7 @@ try:
                 y += 1
 
         def update_quads(bindings, quads):
+            clear_box_children()
             q1 = "Test1"
             q2 = "Test2"
             q3 = "Test3"
